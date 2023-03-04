@@ -1,0 +1,88 @@
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+bool burnout = false;
+bool you_hired = false;
+using namespace std;
+chrono::time_point <chrono::system_clock> startTime;
+
+bool checkBurnoutChange()
+{
+    static bool firstFoo = true;
+    static bool burnoutFoo = burnout;
+    chrono::time_point<chrono::steady_clock> start = chrono::steady_clock::now();
+    while (true)
+    {
+        chrono::time_point<chrono::steady_clock> now = chrono::steady_clock::now();
+        chrono::duration<double> passed_seconds = now - start;
+        if (firstFoo)
+        {
+            burnoutFoo = burnout;
+            firstFoo = false;
+        }
+        if (burnoutFoo == burnout)
+        {
+            if (passed_seconds.count() >= 3)
+            {
+                cout << burnout << " ";
+                cout << "OK" << endl;
+                exit(1);
+            }
+        }
+        else
+        {
+            firstFoo = true;
+            cout << "not OK" << endl;
+            start = chrono::steady_clock::now();
+        }
+    }
+}
+
+void changeHiredValue()
+{
+    while (you_hired != 1)
+    {
+        srand(time(NULL));
+        int n = rand() % 2;
+        if (n == 1)
+        {
+            you_hired = 1;
+        }
+    }
+}
+
+void changeBurnoutValue()
+{
+    while (true)
+    {
+        cout << burnout << " ";
+        this_thread::sleep_for(chrono::milliseconds(1400));
+        srand(time(NULL));
+        int n = rand() % 2;  // генерируем случайное число 0 или 1
+        if (n == 1)
+        {
+            if (burnout != true)
+            {
+                burnout = true;
+            }
+            else
+            {
+                burnout = false;
+            }
+        }
+    }
+}
+
+int main()
+{
+    changeHiredValue();
+    if (you_hired == 1)
+    {
+        thread burnout1(changeBurnoutValue);
+        thread burnout2(checkBurnoutChange);
+        burnout2.join();
+    }
+
+    return 0;
+}
